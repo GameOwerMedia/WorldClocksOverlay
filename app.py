@@ -6,7 +6,7 @@ from collections.abc import Callable
 from datetime import datetime
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from PySide6.QtCore import QPoint, QRect, Qt, QTimer
+from PySide6.QtCore import QEvent, QPoint, QRect, Qt, QTimer
 from PySide6.QtGui import QAction, QFont, QFontMetrics, QGuiApplication
 from PySide6.QtWidgets import (
     QApplication,
@@ -74,6 +74,27 @@ def save_config(cfg: dict) -> None:
     with open(config_path(), "w", encoding="utf-8") as file:
         json.dump(cfg, file, indent=2, ensure_ascii=False)
         file.write("\n")
+
+
+def config_opacity(cfg: dict) -> float:
+    try:
+        return max(0.2, min(1.0, float(cfg.get("window", {}).get("opacity", 0.82))))
+    except (TypeError, ValueError):
+        return 0.82
+
+
+def alpha(base_alpha: int, opacity: float) -> int:
+    if base_alpha <= 0:
+        return 0
+    return max(1, min(255, int(round(base_alpha * opacity))))
+
+
+def rect_is_visible_on_any_screen(x: int, y: int, width: int, height: int) -> bool:
+    rect = QRect(x, y, max(1, width), max(1, height))
+    for screen in QGuiApplication.screens():
+        if rect.intersects(screen.availableGeometry()):
+            return True
+    return False
 
 
 def city_key(city: dict) -> str:
@@ -266,12 +287,13 @@ class CitySelectionDialog(QDialog):
 
 
 class TimeCard(QFrame):
-    def __init__(self, city_label: str, timezone_name: str, display_cfg: dict, scale: float):
+    def __init__(self, city_label: str, timezone_name: str, display_cfg: dict, scale: float, opacity: float):
         super().__init__()
         self.city_label = city_label.upper()
         self.timezone_name = timezone_name
         self.display_cfg = display_cfg
         self.scale = scale
+        self.opacity = opacity
         self.current_time_text = "--:--"
 
         self.setObjectName("timeCard")
@@ -293,32 +315,38 @@ class TimeCard(QFrame):
 
     def apply_theme(self, theme_name: str) -> None:
         if theme_name == "white":
+            bg_alpha = alpha(155, self.opacity)
+            border_alpha = alpha(35, self.opacity)
+            text_alpha = alpha(230, self.opacity)
             self.setStyleSheet(
-                """
-                QFrame#timeCard {
-                    background-color: rgba(255, 255, 255, 155);
-                    border: 1px solid rgba(0, 0, 0, 35);
+                f"""
+                QFrame#timeCard {{
+                    background-color: rgba(255, 255, 255, {bg_alpha});
+                    border: 1px solid rgba(0, 0, 0, {border_alpha});
                     border-radius: 12px;
-                }
-                QLabel {
-                    color: rgba(20, 20, 20, 230);
+                }}
+                QLabel {{
+                    color: rgba(20, 20, 20, {text_alpha});
                     background: transparent;
-                }
+                }}
                 """
             )
             return
 
+        bg_alpha = alpha(95, self.opacity)
+        border_alpha = alpha(35, self.opacity)
+        text_alpha = alpha(255, self.opacity)
         self.setStyleSheet(
-            """
-            QFrame#timeCard {
-                background-color: rgba(15, 15, 15, 95);
-                border: 1px solid rgba(255, 255, 255, 35);
+            f"""
+            QFrame#timeCard {{
+                background-color: rgba(15, 15, 15, {bg_alpha});
+                border: 1px solid rgba(255, 255, 255, {border_alpha});
                 border-radius: 12px;
-            }
-            QLabel {
-                color: white;
+            }}
+            QLabel {{
+                color: rgba(255, 255, 255, {text_alpha});
                 background: transparent;
-            }
+            }}
             """
         )
 
@@ -394,7 +422,6 @@ class SingleClockWindow(QWidget):
         self.apply_window_flags()
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowTitle(f"{APP_NAME} - {city['label']}")
-        self.setWindowOpacity(self.manager.cfg["window"].get("opacity", 0.82))
 
         self.outer_layout = QVBoxLayout(self)
         self.outer_layout.setContentsMargins(0, 0, 0, 0)
@@ -406,7 +433,13 @@ class SingleClockWindow(QWidget):
         self.root_layout.setContentsMargins(8, 8, 8, 8)
         self.root_layout.setSpacing(0)
 
-        self.card = TimeCard(city["label"], city["timezone"], self.manager.cfg["display"], float(self.window_cfg.get("scale", 1.0)))
+        self.card = TimeCard(
+            city["label"],
+            city["timezone"],
+            self.manager.cfg["display"],
+            float(self.window_cfg.get("scale", 1.0)),
+            config_opacity(self.manager.cfg),
+        )
         self.root_layout.addWidget(self.card)
 
         self.size_grip = QSizeGrip(self.root)
@@ -422,34 +455,47 @@ class SingleClockWindow(QWidget):
         self.card.refresh_time()
 
     def apply_window_flags(self) -> None:
-        flags = Qt.FramelessWindowHint | Qt.Tool
+        flags = Qt.FramelessWindowHint | Qt.Window | Qt.WindowDoesNotAcceptFocus
         if self.manager.cfg["window"].get("always_on_top", True):
             flags |= Qt.WindowStaysOnTopHint
         self.setWindowFlags(flags)
 
+    def _restore_overlay_visibility(self) -> None:
+        if self.isVisible():
+            self.show()
+            self.raise_()
+
+    def event(self, event) -> bool:
+        if event.type() in {QEvent.WindowDeactivate, QEvent.ActivationChange}:
+            QTimer.singleShot(0, self._restore_overlay_visibility)
+            QTimer.singleShot(150, self._restore_overlay_visibility)
+        return super().event(event)
+
     def apply_theme(self) -> None:
         theme_name = self.manager.cfg["display"].get("theme", "black")
+        opacity = config_opacity(self.manager.cfg)
         if theme_name == "white":
             self.root.setStyleSheet(
-                """
-                QFrame#rootFrame {
-                    background-color: rgba(255, 255, 255, 105);
-                    border: 1px solid rgba(0, 0, 0, 35);
+                f"""
+                QFrame#rootFrame {{
+                    background-color: rgba(255, 255, 255, {alpha(105, opacity)});
+                    border: 1px solid rgba(0, 0, 0, {alpha(35, opacity)});
                     border-radius: 16px;
-                }
+                }}
                 """
             )
         else:
             self.root.setStyleSheet(
-                """
-                QFrame#rootFrame {
-                    background-color: rgba(20, 20, 20, 55);
-                    border: 1px solid rgba(255, 255, 255, 28);
+                f"""
+                QFrame#rootFrame {{
+                    background-color: rgba(20, 20, 20, {alpha(55, opacity)});
+                    border: 1px solid rgba(255, 255, 255, {alpha(28, opacity)});
                     border-radius: 16px;
-                }
+                }}
                 """
             )
         self.card.display_cfg = self.manager.cfg["display"]
+        self.card.opacity = opacity
         self.card.apply_theme(theme_name)
         self.card.update_fonts()
 
@@ -459,12 +505,14 @@ class SingleClockWindow(QWidget):
 
     def apply_initial_geometry(self) -> None:
         min_width, min_height = self.minimum_clock_size()
+        width = max(min_width, int(self.window_cfg.get("width", DEFAULT_CITY_WIDTH)))
+        height = max(min_height, int(self.window_cfg.get("height", DEFAULT_CITY_HEIGHT)))
         self.setMinimumSize(min_width, min_height)
-        self.resize(max(min_width, int(self.window_cfg.get("width", DEFAULT_CITY_WIDTH))), max(min_height, int(self.window_cfg.get("height", DEFAULT_CITY_HEIGHT))))
+        self.resize(width, height)
 
         x = self.window_cfg.get("x")
         y = self.window_cfg.get("y")
-        if x is not None and y is not None:
+        if x is not None and y is not None and rect_is_visible_on_any_screen(int(x), int(y), width, height):
             self.move(x, y)
         else:
             self.snap_bottom_right(save_state=False)
@@ -570,7 +618,6 @@ class LineClockWindow(QWidget):
         self.apply_window_flags()
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowTitle(f"{APP_NAME} - Line Window")
-        self.setWindowOpacity(self.manager.cfg["window"].get("opacity", 0.82))
 
         self.outer_layout = QVBoxLayout(self)
         self.outer_layout.setContentsMargins(0, 0, 0, 0)
@@ -605,35 +652,48 @@ class LineClockWindow(QWidget):
         return self.manager.line_cities()
 
     def apply_window_flags(self) -> None:
-        flags = Qt.FramelessWindowHint | Qt.Tool
+        flags = Qt.FramelessWindowHint | Qt.Window | Qt.WindowDoesNotAcceptFocus
         if self.manager.cfg["window"].get("always_on_top", True):
             flags |= Qt.WindowStaysOnTopHint
         self.setWindowFlags(flags)
 
+    def _restore_overlay_visibility(self) -> None:
+        if self.isVisible():
+            self.show()
+            self.raise_()
+
+    def event(self, event) -> bool:
+        if event.type() in {QEvent.WindowDeactivate, QEvent.ActivationChange}:
+            QTimer.singleShot(0, self._restore_overlay_visibility)
+            QTimer.singleShot(150, self._restore_overlay_visibility)
+        return super().event(event)
+
     def apply_theme(self) -> None:
         theme_name = self.manager.cfg["display"].get("theme", "black")
+        opacity = config_opacity(self.manager.cfg)
         if theme_name == "white":
             self.root.setStyleSheet(
-                """
-                QFrame#rootFrame {
-                    background-color: rgba(255, 255, 255, 105);
-                    border: 1px solid rgba(0, 0, 0, 35);
+                f"""
+                QFrame#rootFrame {{
+                    background-color: rgba(255, 255, 255, {alpha(105, opacity)});
+                    border: 1px solid rgba(0, 0, 0, {alpha(35, opacity)});
                     border-radius: 16px;
-                }
+                }}
                 """
             )
         else:
             self.root.setStyleSheet(
-                """
-                QFrame#rootFrame {
-                    background-color: rgba(20, 20, 20, 55);
-                    border: 1px solid rgba(255, 255, 255, 28);
+                f"""
+                QFrame#rootFrame {{
+                    background-color: rgba(20, 20, 20, {alpha(55, opacity)});
+                    border: 1px solid rgba(255, 255, 255, {alpha(28, opacity)});
                     border-radius: 16px;
-                }
+                }}
                 """
             )
         for card in self.cards:
             card.display_cfg = self.manager.cfg["display"]
+            card.opacity = opacity
             card.apply_theme(theme_name)
             card.update_fonts()
 
@@ -646,8 +706,9 @@ class LineClockWindow(QWidget):
         self.cards = []
 
         scale = float(self.manager.cfg["window"].get("scale", 1.0))
+        opacity = config_opacity(self.manager.cfg)
         for city in self.line_cities():
-            card = TimeCard(city["label"], city["timezone"], self.manager.cfg["display"], scale)
+            card = TimeCard(city["label"], city["timezone"], self.manager.cfg["display"], scale, opacity)
             card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             self.cards_layout.addWidget(card)
             self.cards.append(card)
@@ -668,11 +729,13 @@ class LineClockWindow(QWidget):
         self.setMinimumSize(min_width, min_height)
         saved_width = int(self.manager.cfg["window"].get("width", min_width))
         saved_height = int(self.manager.cfg["window"].get("height", min_height))
-        self.resize(max(min_width, saved_width), max(min_height, saved_height))
+        width = max(min_width, saved_width)
+        height = max(min_height, saved_height)
+        self.resize(width, height)
 
         x = self.manager.cfg["window"].get("x")
         y = self.manager.cfg["window"].get("y")
-        if x is not None and y is not None:
+        if x is not None and y is not None and rect_is_visible_on_any_screen(int(x), int(y), width, height):
             self.move(x, y)
         else:
             self.snap_bottom_right(save_state=False)
@@ -858,7 +921,6 @@ class ClockManager:
             else:
                 self.line_window.rebuild_cards()
                 self.line_window.apply_window_flags()
-                self.line_window.setWindowOpacity(self.cfg["window"].get("opacity", 0.82))
                 self.line_window.apply_theme()
                 min_width, min_height = self.line_window.minimum_line_size()
                 saved_width = int(self.cfg["window"].get("width", min_width))
@@ -887,7 +949,6 @@ class ClockManager:
                 window.city = city
                 window.window_cfg = ensure_city_window(city, city.get("window", {}).get("offset_index", 0))
                 window.apply_window_flags()
-                window.setWindowOpacity(self.cfg["window"].get("opacity", 0.82))
                 window.card.display_cfg = self.cfg["display"]
                 window.card.scale = float(window.window_cfg.get("scale", 1.0))
                 window.apply_theme()

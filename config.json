@@ -1,12 +1,12 @@
 {
   "window": {
-    "x": -472,
-    "y": 1035,
-    "width": 376,
+    "x": -395,
+    "y": 973,
+    "width": 380,
     "height": 44,
     "opacity": 0.82,
     "always_on_top": true,
-    "snap_bottom_right": false,
+    "snap_bottom_right": true,
     "scale": 1.0
   },
   "display": {
