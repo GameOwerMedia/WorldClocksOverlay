@@ -1,0 +1,1702 @@
+{
+  "window": {
+    "x": -472,
+    "y": 1035,
+    "width": 376,
+    "height": 44,
+    "opacity": 0.82,
+    "always_on_top": true,
+    "snap_bottom_right": false,
+    "scale": 1.0
+  },
+  "display": {
+    "show_seconds": false,
+    "use_24h": true,
+    "font_size_city": 11,
+    "font_size_time": 20,
+    "compact_mode_threshold": 2,
+    "theme": "white"
+  },
+  "cities": [
+    {
+      "label": "Tokyo",
+      "timezone": "Asia/Tokyo",
+      "enabled": true,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": 1755,
+        "y": 953,
+        "snap_bottom_right": false,
+        "offset_index": 0
+      },
+      "placement": "line"
+    },
+    {
+      "label": "Seoul",
+      "timezone": "Asia/Seoul",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 1
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Beijing",
+      "timezone": "Asia/Shanghai",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 2
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Shanghai",
+      "timezone": "Asia/Shanghai",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": false,
+        "x": 1671,
+        "y": 935,
+        "snap_bottom_right": false,
+        "offset_index": 3
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Hong Kong",
+      "timezone": "Asia/Hong_Kong",
+      "enabled": true,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": 1643,
+        "y": 929,
+        "snap_bottom_right": false,
+        "offset_index": 4
+      },
+      "placement": "line"
+    },
+    {
+      "label": "Taipei",
+      "timezone": "Asia/Taipei",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 5
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Manila",
+      "timezone": "Asia/Manila",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 6
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Singapore",
+      "timezone": "Asia/Singapore",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 7
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Bangkok",
+      "timezone": "Asia/Bangkok",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 8
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Jakarta",
+      "timezone": "Asia/Jakarta",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 9
+      },
+      "placement": "off"
+    },
+    {
+      "label": "New Delhi",
+      "timezone": "Asia/Kolkata",
+      "enabled": true,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": 1475,
+        "y": 893,
+        "snap_bottom_right": false,
+        "offset_index": 10
+      },
+      "placement": "line"
+    },
+    {
+      "label": "Mumbai",
+      "timezone": "Asia/Kolkata",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 11
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Colombo",
+      "timezone": "Asia/Colombo",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 12
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Kathmandu",
+      "timezone": "Asia/Kathmandu",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 13
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Dhaka",
+      "timezone": "Asia/Dhaka",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 14
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Yangon",
+      "timezone": "Asia/Yangon",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 15
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Islamabad",
+      "timezone": "Asia/Karachi",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 16
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Karachi",
+      "timezone": "Asia/Karachi",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 17
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Kabul",
+      "timezone": "Asia/Kabul",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 18
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Tashkent",
+      "timezone": "Asia/Tashkent",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 19
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Almaty",
+      "timezone": "Asia/Almaty",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 20
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Bishkek",
+      "timezone": "Asia/Bishkek",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 21
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Tbilisi",
+      "timezone": "Asia/Tbilisi",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 22
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Yerevan",
+      "timezone": "Asia/Yerevan",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 23
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Baku",
+      "timezone": "Asia/Baku",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 24
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Tehran",
+      "timezone": "Asia/Tehran",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 25
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Dubai",
+      "timezone": "Asia/Dubai",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 26
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Abu Dhabi",
+      "timezone": "Asia/Dubai",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 27
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Muscat",
+      "timezone": "Asia/Muscat",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 28
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Riyadh",
+      "timezone": "Asia/Riyadh",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 29
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Doha",
+      "timezone": "Asia/Qatar",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 30
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Kuwait City",
+      "timezone": "Asia/Kuwait",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 31
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Jerusalem",
+      "timezone": "Asia/Jerusalem",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 32
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Tel Aviv",
+      "timezone": "Asia/Jerusalem",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 33
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Istanbul",
+      "timezone": "Europe/Istanbul",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 34
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Nairobi",
+      "timezone": "Africa/Nairobi",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 35
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Addis Ababa",
+      "timezone": "Africa/Addis_Ababa",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 36
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Cairo",
+      "timezone": "Africa/Cairo",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 37
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Cape Town",
+      "timezone": "Africa/Johannesburg",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 38
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Johannesburg",
+      "timezone": "Africa/Johannesburg",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 39
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Lagos",
+      "timezone": "Africa/Lagos",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 40
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Casablanca",
+      "timezone": "Africa/Casablanca",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 41
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Accra",
+      "timezone": "Africa/Accra",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 42
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Reykjavik",
+      "timezone": "Atlantic/Reykjavik",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 43
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Dublin",
+      "timezone": "Europe/Dublin",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 44
+      },
+      "placement": "off"
+    },
+    {
+      "label": "London",
+      "timezone": "Europe/London",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 45
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Lisbon",
+      "timezone": "Europe/Lisbon",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 46
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Madrid",
+      "timezone": "Europe/Madrid",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 47
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Paris",
+      "timezone": "Europe/Paris",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 48
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Amsterdam",
+      "timezone": "Europe/Amsterdam",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 49
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Brussels",
+      "timezone": "Europe/Brussels",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 50
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Berlin",
+      "timezone": "Europe/Berlin",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 51
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Copenhagen",
+      "timezone": "Europe/Copenhagen",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 52
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Oslo",
+      "timezone": "Europe/Oslo",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 53
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Stockholm",
+      "timezone": "Europe/Stockholm",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 54
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Rome",
+      "timezone": "Europe/Rome",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 55
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Prague",
+      "timezone": "Europe/Prague",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 56
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Vienna",
+      "timezone": "Europe/Vienna",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 57
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Warsaw",
+      "timezone": "Europe/Warsaw",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": false,
+        "x": -883,
+        "y": 653,
+        "snap_bottom_right": false,
+        "offset_index": 58
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Budapest",
+      "timezone": "Europe/Budapest",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 59
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Athens",
+      "timezone": "Europe/Athens",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 60
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Bucharest",
+      "timezone": "Europe/Bucharest",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 61
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Kyiv",
+      "timezone": "Europe/Kyiv",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 62
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Helsinki",
+      "timezone": "Europe/Helsinki",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 63
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Riga",
+      "timezone": "Europe/Riga",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 64
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Vilnius",
+      "timezone": "Europe/Vilnius",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 65
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Tallinn",
+      "timezone": "Europe/Tallinn",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 66
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Moscow",
+      "timezone": "Europe/Moscow",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 67
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Samara",
+      "timezone": "Europe/Samara",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 68
+      },
+      "placement": "off"
+    },
+    {
+      "label": "New York",
+      "timezone": "America/New_York",
+      "enabled": true,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": -733,
+        "y": 619,
+        "snap_bottom_right": false,
+        "offset_index": 69
+      },
+      "placement": "line"
+    },
+    {
+      "label": "Miami",
+      "timezone": "America/New_York",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 70
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Toronto",
+      "timezone": "America/Toronto",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 71
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Lima",
+      "timezone": "America/Lima",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 72
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Bogota",
+      "timezone": "America/Bogota",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 73
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Havana",
+      "timezone": "America/Havana",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 74
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Dallas",
+      "timezone": "America/Chicago",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 75
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Chicago",
+      "timezone": "America/Chicago",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 76
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Mexico City",
+      "timezone": "America/Mexico_City",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 77
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Winnipeg",
+      "timezone": "America/Winnipeg",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 78
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Denver",
+      "timezone": "America/Denver",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 79
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Phoenix",
+      "timezone": "America/Phoenix",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 80
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Edmonton",
+      "timezone": "America/Edmonton",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 81
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Los Angeles",
+      "timezone": "America/Los_Angeles",
+      "enabled": true,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": -541,
+        "y": 461,
+        "snap_bottom_right": false,
+        "offset_index": 82
+      },
+      "placement": "line"
+    },
+    {
+      "label": "San Francisco",
+      "timezone": "America/Los_Angeles",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 83
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Vancouver",
+      "timezone": "America/Vancouver",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 84
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Anchorage",
+      "timezone": "America/Anchorage",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 85
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Honolulu",
+      "timezone": "Pacific/Honolulu",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 86
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Santiago",
+      "timezone": "America/Santiago",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 87
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Buenos Aires",
+      "timezone": "America/Argentina/Buenos_Aires",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 88
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Montevideo",
+      "timezone": "America/Montevideo",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 89
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Rio de Janeiro",
+      "timezone": "America/Sao_Paulo",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 90
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Sao Paulo",
+      "timezone": "America/Sao_Paulo",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 91
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Halifax",
+      "timezone": "America/Halifax",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 92
+      },
+      "placement": "off"
+    },
+    {
+      "label": "St Johns",
+      "timezone": "America/St_Johns",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 93
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Azores",
+      "timezone": "Atlantic/Azores",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 94
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Sydney",
+      "timezone": "Australia/Sydney",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 95
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Melbourne",
+      "timezone": "Australia/Melbourne",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 96
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Brisbane",
+      "timezone": "Australia/Brisbane",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 97
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Adelaide",
+      "timezone": "Australia/Adelaide",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 98
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Darwin",
+      "timezone": "Australia/Darwin",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 99
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Perth",
+      "timezone": "Australia/Perth",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 100
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Auckland",
+      "timezone": "Pacific/Auckland",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 101
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Wellington",
+      "timezone": "Pacific/Auckland",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 102
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Chatham",
+      "timezone": "Pacific/Chatham",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 103
+      },
+      "placement": "off"
+    },
+    {
+      "label": "Suva",
+      "timezone": "Pacific/Fiji",
+      "enabled": false,
+      "window": {
+        "width": 118,
+        "height": 50,
+        "scale": 1.0,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
+        "offset_index": 104
+      },
+      "placement": "off"
+    }
+  ]
+}
