@@ -39,6 +39,7 @@ DEFAULT_CITY_HEIGHT = 50
 PLACEMENT_OFF = "off"
 PLACEMENT_LINE = "line"
 PLACEMENT_WINDOW = "window"
+SAVE_DEBOUNCE_MS = 500
 
 
 def app_base_dir() -> str:
@@ -70,10 +71,40 @@ def load_config() -> dict:
         return json.load(file)
 
 
+_save_timer: QTimer | None = None
+_save_pending_cfg: dict | None = None
+
+
+def _flush_save() -> None:
+    global _save_pending_cfg
+    if _save_pending_cfg is None:
+        return
+    cfg = _save_pending_cfg
+    _save_pending_cfg = None
+    try:
+        with open(config_path(), "w", encoding="utf-8") as file:
+            json.dump(cfg, file, indent=2, ensure_ascii=False)
+            file.write("\n")
+    except OSError:
+        pass
+
+
 def save_config(cfg: dict) -> None:
-    with open(config_path(), "w", encoding="utf-8") as file:
-        json.dump(cfg, file, indent=2, ensure_ascii=False)
-        file.write("\n")
+    global _save_timer, _save_pending_cfg
+    _save_pending_cfg = cfg
+    if _save_timer is None:
+        _save_timer = QTimer()
+        _save_timer.setSingleShot(True)
+        _save_timer.timeout.connect(_flush_save)
+    if _save_timer.isActive():
+        _save_timer.stop()
+    _save_timer.start(SAVE_DEBOUNCE_MS)
+
+
+def save_config_immediate(cfg: dict) -> None:
+    global _save_pending_cfg
+    _save_pending_cfg = cfg
+    _flush_save()
 
 
 def config_opacity(cfg: dict) -> float:
@@ -87,6 +118,24 @@ def alpha(base_alpha: int, opacity: float) -> int:
     if base_alpha <= 0:
         return 0
     return max(1, min(255, int(round(base_alpha * opacity))))
+
+
+def root_frame_stylesheet(theme_name: str, opacity: float) -> str:
+    if theme_name == "white":
+        return f"""
+            QFrame#rootFrame {{
+                background-color: rgba(255, 255, 255, {alpha(105, opacity)});
+                border: 1px solid rgba(0, 0, 0, {alpha(35, opacity)});
+                border-radius: 16px;
+            }}
+        """
+    return f"""
+        QFrame#rootFrame {{
+            background-color: rgba(20, 20, 20, {alpha(55, opacity)});
+            border: 1px solid rgba(255, 255, 255, {alpha(28, opacity)});
+            border-radius: 16px;
+        }}
+    """
 
 
 def rect_is_visible_on_any_screen(x: int, y: int, width: int, height: int) -> bool:
@@ -403,7 +452,6 @@ class TimeCard(QFrame):
         except Exception:
             self.current_time_text = "ERR"
             self.time_label_widget.setText(self.current_time_text)
-        self.update_fonts()
 
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)
@@ -474,26 +522,7 @@ class SingleClockWindow(QWidget):
     def apply_theme(self) -> None:
         theme_name = self.manager.cfg["display"].get("theme", "black")
         opacity = config_opacity(self.manager.cfg)
-        if theme_name == "white":
-            self.root.setStyleSheet(
-                f"""
-                QFrame#rootFrame {{
-                    background-color: rgba(255, 255, 255, {alpha(105, opacity)});
-                    border: 1px solid rgba(0, 0, 0, {alpha(35, opacity)});
-                    border-radius: 16px;
-                }}
-                """
-            )
-        else:
-            self.root.setStyleSheet(
-                f"""
-                QFrame#rootFrame {{
-                    background-color: rgba(20, 20, 20, {alpha(55, opacity)});
-                    border: 1px solid rgba(255, 255, 255, {alpha(28, opacity)});
-                    border-radius: 16px;
-                }}
-                """
-            )
+        self.root.setStyleSheet(root_frame_stylesheet(theme_name, opacity))
         self.card.display_cfg = self.manager.cfg["display"]
         self.card.opacity = opacity
         self.card.apply_theme(theme_name)
@@ -671,26 +700,7 @@ class LineClockWindow(QWidget):
     def apply_theme(self) -> None:
         theme_name = self.manager.cfg["display"].get("theme", "black")
         opacity = config_opacity(self.manager.cfg)
-        if theme_name == "white":
-            self.root.setStyleSheet(
-                f"""
-                QFrame#rootFrame {{
-                    background-color: rgba(255, 255, 255, {alpha(105, opacity)});
-                    border: 1px solid rgba(0, 0, 0, {alpha(35, opacity)});
-                    border-radius: 16px;
-                }}
-                """
-            )
-        else:
-            self.root.setStyleSheet(
-                f"""
-                QFrame#rootFrame {{
-                    background-color: rgba(20, 20, 20, {alpha(55, opacity)});
-                    border: 1px solid rgba(255, 255, 255, {alpha(28, opacity)});
-                    border-radius: 16px;
-                }}
-                """
-            )
+        self.root.setStyleSheet(root_frame_stylesheet(theme_name, opacity))
         for card in self.cards:
             card.display_cfg = self.manager.cfg["display"]
             card.opacity = opacity
@@ -1050,6 +1060,7 @@ class ClockManager:
     def exit_requested(self) -> None:
         self.hide_all()
         self.tray.hide()
+        save_config_immediate(self.cfg)
         self.app.quit()
 
 

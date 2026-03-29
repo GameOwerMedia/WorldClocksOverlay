@@ -1,7 +1,7 @@
 {
   "window": {
-    "x": -395,
-    "y": 973,
+    "x": null,
+    "y": null,
     "width": 380,
     "height": 44,
     "opacity": 0.82,
@@ -14,8 +14,7 @@
     "use_24h": true,
     "font_size_city": 11,
     "font_size_time": 20,
-    "compact_mode_threshold": 2,
-    "theme": "white"
+    "theme": "black"
   },
   "cities": [
     {
@@ -27,9 +26,9 @@
         "height": 50,
         "scale": 1.0,
         "visible": true,
-        "x": 1755,
-        "y": 953,
-        "snap_bottom_right": false,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
         "offset_index": 0
       },
       "placement": "line"
@@ -74,10 +73,10 @@
         "width": 118,
         "height": 50,
         "scale": 1.0,
-        "visible": false,
-        "x": 1671,
-        "y": 935,
-        "snap_bottom_right": false,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
         "offset_index": 3
       },
       "placement": "off"
@@ -85,18 +84,18 @@
     {
       "label": "Hong Kong",
       "timezone": "Asia/Hong_Kong",
-      "enabled": true,
+      "enabled": false,
       "window": {
         "width": 118,
         "height": 50,
         "scale": 1.0,
         "visible": true,
-        "x": 1643,
-        "y": 929,
-        "snap_bottom_right": false,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
         "offset_index": 4
       },
-      "placement": "line"
+      "placement": "off"
     },
     {
       "label": "Taipei",
@@ -181,18 +180,18 @@
     {
       "label": "New Delhi",
       "timezone": "Asia/Kolkata",
-      "enabled": true,
+      "enabled": false,
       "window": {
         "width": 118,
         "height": 50,
         "scale": 1.0,
         "visible": true,
-        "x": 1475,
-        "y": 893,
-        "snap_bottom_right": false,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
         "offset_index": 10
       },
-      "placement": "line"
+      "placement": "off"
     },
     {
       "label": "Mumbai",
@@ -741,7 +740,7 @@
     {
       "label": "London",
       "timezone": "Europe/London",
-      "enabled": false,
+      "enabled": true,
       "window": {
         "width": 118,
         "height": 50,
@@ -752,7 +751,7 @@
         "snap_bottom_right": true,
         "offset_index": 45
       },
-      "placement": "off"
+      "placement": "line"
     },
     {
       "label": "Lisbon",
@@ -954,10 +953,10 @@
         "width": 118,
         "height": 50,
         "scale": 1.0,
-        "visible": false,
-        "x": -883,
-        "y": 653,
-        "snap_bottom_right": false,
+        "visible": true,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
         "offset_index": 58
       },
       "placement": "off"
@@ -1131,9 +1130,9 @@
         "height": 50,
         "scale": 1.0,
         "visible": true,
-        "x": -733,
-        "y": 619,
-        "snap_bottom_right": false,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
         "offset_index": 69
       },
       "placement": "line"
@@ -1333,18 +1332,18 @@
     {
       "label": "Los Angeles",
       "timezone": "America/Los_Angeles",
-      "enabled": true,
+      "enabled": false,
       "window": {
         "width": 118,
         "height": 50,
         "scale": 1.0,
         "visible": true,
-        "x": -541,
-        "y": 461,
-        "snap_bottom_right": false,
+        "x": null,
+        "y": null,
+        "snap_bottom_right": true,
         "offset_index": 82
       },
-      "placement": "line"
+      "placement": "off"
     },
     {
       "label": "San Francisco",

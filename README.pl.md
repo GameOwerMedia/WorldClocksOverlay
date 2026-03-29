@@ -1,140 +1,66 @@
 # World Clock Overlay
 
-Mały, półprzezroczysty overlay z zegarami świata dla Windows.
+Lekki, przezroczysty overlay z zegarami stref czasowych dla Windows.
 
-World Clock Overlay to lekki system widgetów desktopowych dla Windows. Aplikacja obsługuje wiele niezależnych okien zegarów, które można rozmieścić w dowolnych miejscach i na różnych monitorach, a także tray, autostart, wyszukiwalną listę miast, edytowalne strefy czasowe, kompaktowe skalowanie i dwa półprzezroczyste motywy dopasowane do jasnego lub ciemnego tła.
+Wyswietla sie przy pasku zadan lub jako niezalezne okna na dowolnym monitorze. Zbudowany w Pythonie z PySide6, pakowany do pojedynczego `.exe`.
+
+![World Clock Overlay](docs/screenshots/line-window.png)
 
 ## Funkcje
 
-- przezroczyste okno bez ramki
-- always-on-top
-- zaokrąglone rogi
-- ikona tray z opcją pokaż / ukryj
-- przeciąganie lewym przyciskiem myszy
-- zmiana rozmiaru przez uchwyt w prawym dolnym rogu
-- skalowanie kółkiem myszy
-- wiele niezależnych okien zegarów
-- nielimitowana liczba aktywnych zegarów
-- scrollowalna i przeszukiwalna lista miast
-- każdy zegar można przesuwać i zmieniać jego rozmiar niezależnie
-- zegary można rozmieścić na różnych monitorach
-- wybór miast z menu aplikacji
-- edytowalny `config.json`
-- przeładowanie konfiguracji bez zmiany kodu
-- zapis pozycji i rozmiaru okna
-- snap do prawego dolnego rogu
-- przełączanie 24h / 12h
-- przełączanie sekund
-- dwa półprzezroczyste motywy:
-- `Black`
-- `White`
-- autostart Windows przez `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`
-- build EXE przez PyInstaller
-
-## Wymagania
-
-- Windows
-- Python 3.11+
-
-## Technologie
-
-- Python
-- PySide6
-- `zoneinfo`
-- `tzdata`
-- PyInstaller
-
-## Pliki projektu
-
-- `app.py` - główna aplikacja
-- `config.json` - lokalna konfiguracja
-- `requirements.txt` - zależności Pythona
-- `run_dev.bat` - uruchomienie w trybie developerskim
-- `build.bat` - ręczny build EXE
-- `install.bat` - przygotowanie venv, instalacja zależności, build EXE i opcjonalny autostart
-- `uninstall.bat` - usunięcie autostartu z Windows
-- `README.md` - dokumentacja po angielsku
-- `README.pl.md` - dokumentacja po polsku
+- Przezroczyste, bezramkowe widgety always-on-top
+- Dwa tryby: poziomy **pasek** lub niezalezne **okna**
+- 100+ miast ze wszystkich glownych stref czasowych
+- Wyszukiwarka miast z indywidualnym wyborem trybu
+- Przeciaganie, skalowanie kolkiem myszy, zmiana rozmiaru
+- Zapis pozycji i rozmiaru kazdego okna miedzy sesjami
+- Ikona w zasobniku systemowym z przelaczaniem widocznosci
+- Ciemny i jasny motyw z przezroczystoscia
+- Format 24h/12h i opcjonalne sekundy
+- Dziala w pelni offline, dane stref czasowych sa lokalne
 
 ## Szybki start
 
-1. Zainstaluj Python 3.11 lub nowszy.
-2. Otwórz folder projektu.
-3. Uruchom:
+**Wymagania:** Windows, Python 3.11+
 
 ```bat
 install.bat
 ```
 
-4. Po zakończeniu buildu uruchom:
+Uruchom:
 
 ```bat
 dist\WorldClockOverlay.exe
 ```
 
-W trybie developerskim użyj:
+Tryb developerski:
 
 ```bat
 run_dev.bat
 ```
 
-## Output buildu
+## Sterowanie
 
-Plik wykonywalny pojawia się tutaj:
-
-```text
-dist\WorldClockOverlay.exe
-```
-
-## Obsługa
-
-- lewy przycisk myszy: przeciąganie overlayu
-- kółko myszy: skalowanie widgetu
-- uchwyt w prawym dolnym rogu: zmiana rozmiaru
-- prawy klik: menu kontekstowe
-- klik na ikonę tray: pokaż / ukryj wszystkie zegary
-
-## Menu kontekstowe
-
-- `Select clocks...`
-- `Show / Hide seconds`
-- `Switch 24h / 12h`
-- `Reload config`
-- `Snap to bottom-right`
-- `Theme: Black`
-- `Theme: White`
-- `Save position`
-- `Close this clock`
-- `Exit`
-
-## Menu tray
-
-- `Show all`
-- `Hide all`
-- `Select clocks...`
-- `Reload config`
-- `Theme: Black`
-- `Theme: White`
-- `Exit`
+| Wejscie | Akcja |
+|---|---|
+| Lewy przycisk + przeciaganie | Przesuwanie okna |
+| Kolko myszy | Skalowanie |
+| Uchwyt w prawym dolnym rogu | Zmiana rozmiaru |
+| Prawy przycisk | Menu kontekstowe |
+| Klik na ikone tray | Pokaz/ukryj wszystkie zegary |
 
 ## Konfiguracja
 
-Aplikacja używa lokalnego pliku `config.json` obok źródeł albo obok EXE po buildzie.
+Ustawienia sa przechowywane w `config.json` obok pliku wykonywalnego (lub plikow zrodlowych w trybie dev). Zmiany z poziomu UI zapisuja sie automatycznie.
 
-Możesz w nim:
-
-- włączać i wyłączać miasta
-- zmieniać przezroczystość
-- zmieniać format czasu
-- włączać lub wyłączać sekundy
-- ustawiać domyślny motyw
-- kontrolować snap do rogu
-- zapisywać niezależną pozycję i rozmiar dla każdego zegara
-
-Przykład:
+Mozna tez edytowac plik recznie:
 
 ```json
 {
+  "window": {
+    "opacity": 0.82,
+    "always_on_top": true
+  },
   "display": {
     "show_seconds": false,
     "use_24h": true,
@@ -143,27 +69,42 @@ Przykład:
 }
 ```
 
-Dostępne wartości motywu:
+Motywy: `"black"`, `"white"`
 
-- `"black"`
-- `"white"`
+## Jak to dziala
 
-## Autostart
+Kazde miasto moze byc ustawione w jednym z trzech trybow:
 
-`install.bat` może dodać wpis dla bieżącego użytkownika Windows do:
+- **Off** - niewyswietlane
+- **Line window** - dodane do wspolnego poziomego paska
+- **Separate window** - niezalezny plywajacy zegar
 
-```text
-HKCU\Software\Microsoft\Windows\CurrentVersion\Run
-```
+Oba tryby mozna laczyc dowolnie. Pasek jako kompaktowy towarzysz przy taskbarze, osobne okna na konkretnych monitorach.
 
-`uninstall.bat` usuwa ten wpis.
+## Struktura projektu
+
+| Plik | Opis |
+|---|---|
+| `app.py` | Kod zrodlowy aplikacji |
+| `config.json` | Domyslna konfiguracja |
+| `requirements.txt` | Zaleznosci Pythona |
+| `install.bat` | Przygotowanie srodowiska i build EXE |
+| `build.bat` | Samodzielny skrypt budowania |
+| `run_dev.bat` | Uruchomienie ze zrodel |
+| `uninstall.bat` | Skrypt czyszczacy |
+
+## Technologie
+
+- Python 3.11+
+- PySide6
+- `zoneinfo` + `tzdata`
+- PyInstaller
 
 ## Uwagi
 
-- aplikacja nie integruje się natywnie z obszarem systemowego zegara na pasku zadań Windows
-- działa jako lekki floating overlay, który wizualnie zachowuje się jak jeden lub wiele dodatkowych zegarów przy pasku zadań
-- dane stref czasowych są lokalne i nie wymagają internetu
+- To plywajacy overlay, nie natywne rozszerzenie paska zadan.
+- Dane stref czasowych sa lokalne. Brak dostepu do sieci.
 
 ## Licencja
 
-Projekt jest udostępniony na licencji MIT. Szczegóły znajdują się w pliku `LICENSE`.
+Licencja MIT. Zobacz [LICENSE](LICENSE).

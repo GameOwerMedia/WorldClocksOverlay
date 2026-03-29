@@ -1,140 +1,66 @@
 # World Clock Overlay
 
-Transparent always-on-top world clock overlay for Windows, built with Python and PySide6.
+A lightweight, transparent world clock overlay for Windows.
 
-World Clock Overlay is a lightweight desktop utility for people who need additional clocks without a heavy dashboard. It can run as a compact horizontal line near the taskbar clock, or as multiple detached clock windows placed anywhere across one or more monitors.
+Sits near your taskbar or floats anywhere across your monitors. Built with Python and PySide6, packaged as a single standalone `.exe`.
 
-## Screenshot
+![World Clock Overlay preview](docs/screenshots/line-window.png)
 
-![World Clock Overlay line window preview](docs/screenshots/line-window.png)
+## Features
 
-## Highlights
-
-- Transparent, frameless, always-on-top clock widgets
-- Two layout modes:
-  - `Line window` for multiple clocks in one horizontal strip
-  - `Separate window` for independent movable clocks
-- Searchable, scrollable city picker
-- Unlimited clocks
-- Per-clock window position and size persistence
-- Mouse drag to move
-- Mouse wheel scaling
-- Rounded corners and translucent themes
-- Tray icon with quick show/hide controls
-- Configurable `24h / 12h` format and seconds
-- Local timezone support via `zoneinfo` and `tzdata`
-- Windows autostart support
-- PyInstaller packaging to a standalone `.exe`
-
-## Why This Project
-
-Windows only gives you limited timezone visibility near the system clock. This project provides a compact open-source alternative that stays visually lightweight while still being flexible enough for multi-monitor setups, travel workflows, and distributed teams.
-
-## Requirements
-
-- Windows
-- Python 3.11+
-
-## Stack
-
-- Python
-- PySide6
-- `zoneinfo`
-- `tzdata`
-- PyInstaller
+- Transparent, frameless, always-on-top widgets
+- Two layout modes: horizontal **line strip** or independent **floating windows**
+- 100+ cities across all major timezones
+- Searchable city picker with per-clock placement control
+- Mouse drag to move, scroll to scale, corner grip to resize
+- Per-window position and size persistence across sessions
+- System tray with show/hide toggle
+- Dark and light translucent themes
+- 24h/12h format and optional seconds display
+- Works fully offline using local timezone data
 
 ## Quick Start
 
-1. Install Python 3.11 or newer.
-2. Open the project folder.
-3. Run:
+**Requirements:** Windows, Python 3.11+
 
 ```bat
 install.bat
 ```
 
-4. Launch:
+Then launch:
 
 ```bat
 dist\WorldClockOverlay.exe
 ```
 
-For development mode:
+For development:
 
 ```bat
 run_dev.bat
 ```
 
-## Build Output
-
-The packaged executable is generated at:
-
-```text
-dist\WorldClockOverlay.exe
-```
-
-## How It Works
-
-Each city can be assigned one of three modes:
-
-- `Off`
-- `Line window`
-- `Separate window`
-
-This lets you mix both workflows:
-
-- keep a compact horizontal strip near the taskbar
-- open selected clocks as standalone floating windows
-
 ## Controls
 
-- Left mouse button: move a clock window
-- Mouse wheel: scale the active window
-- Bottom-right grip: resize the active window
-- Right click: open the context menu
-- Tray icon click: show / hide all clocks
-
-## Context Menu
-
-- `Add or remove clocks...`
-- `Show / Hide seconds`
-- `Switch 24h / 12h`
-- `Reload config`
-- `Theme: Black`
-- `Theme: White`
-- `Snap to bottom-right`
-- `Save position`
-- `Close this clock`
-- `Exit`
-
-## Tray Menu
-
-- `Show all clocks`
-- `Hide all clocks`
-- `Add or remove clocks...`
-- `Reload config`
-- `Theme: Black`
-- `Theme: White`
-- `Exit`
+| Input | Action |
+|---|---|
+| Left click + drag | Move window |
+| Mouse wheel | Scale up/down |
+| Bottom-right grip | Resize |
+| Right click | Context menu |
+| Tray icon click | Show/hide all clocks |
 
 ## Configuration
 
-The app uses a local `config.json` stored next to the source files, or next to the executable after build.
+The app stores settings in `config.json` next to the executable (or source files in dev mode). All changes made through the UI are saved automatically.
 
-You can configure:
-
-- active cities
-- line vs separate window placement
-- opacity
-- 24h / 12h format
-- seconds visibility
-- theme
-- saved window positions and sizes
-
-Example:
+You can also edit the file directly:
 
 ```json
 {
+  "window": {
+    "opacity": 0.82,
+    "always_on_top": true
+  },
   "display": {
     "show_seconds": false,
     "use_24h": true,
@@ -143,40 +69,42 @@ Example:
 }
 ```
 
-Available theme values:
+Themes: `"black"`, `"white"`
 
-- `"black"`
-- `"white"`
+## How It Works
 
-## Autostart
+Each city can be set to one of three modes:
 
-`install.bat` can register the app for the current Windows user in:
+- **Off** - not displayed
+- **Line window** - added to the shared horizontal strip
+- **Separate window** - independent floating clock
 
-```text
-HKCU\Software\Microsoft\Windows\CurrentVersion\Run
-```
+Mix both modes freely. Use the line strip for a compact taskbar companion, and separate windows for clocks you want on specific monitors.
 
-`uninstall.bat` removes that entry.
+## Project Structure
 
-## Repository Files
+| File | Purpose |
+|---|---|
+| `app.py` | Application source |
+| `config.json` | Default configuration |
+| `requirements.txt` | Python dependencies |
+| `install.bat` | Build environment setup and EXE packaging |
+| `build.bat` | Standalone build script |
+| `run_dev.bat` | Run from source |
+| `uninstall.bat` | Cleanup script |
 
-- `app.py` - main application
-- `config.json` - local configuration
-- `requirements.txt` - Python dependencies
-- `run_dev.bat` - development run
-- `build.bat` - manual EXE build
-- `install.bat` - venv setup, dependencies, build, optional autostart
-- `uninstall.bat` - remove Windows autostart
-- `README.md` - English documentation
-- `README.pl.md` - Polish documentation
-- `LICENSE` - MIT license
+## Stack
+
+- Python 3.11+
+- PySide6
+- `zoneinfo` + `tzdata`
+- PyInstaller
 
 ## Notes
 
-- This project does not hook into the native Windows taskbar clock area.
-- It is intentionally implemented as floating overlays instead of a shell extension.
-- Clock functionality does not require internet access.
+- This is a floating overlay, not a native taskbar extension.
+- All timezone data is local. No network access required.
 
 ## License
 
-Released under the MIT License. See `LICENSE`.
+MIT License. See [LICENSE](LICENSE).
