@@ -33,20 +33,21 @@ cd WorldClocksOverlay
 install.bat
 ```
 
-`install.bat` creates `.venv`, installs PySide6, tzdata and PyInstaller, and builds a single windowed executable with a default `config.json` next to it:
+`install.bat` creates `.venv`, installs PySide6, tzdata and PyInstaller, and builds a single windowed executable. The PyInstaller build collects the `tzdata` files into the executable, which Windows needs because it has no system time-zone database. A default `config.json` is placed next to the executable when that file is not already there:
 
 ```
 dist\WorldClockOverlay.exe
 dist\config.json
 ```
 
-To run from source instead, without building: `run_dev.bat`. To remove the build output (and a `WorldClockOverlay` autostart entry, if you added one yourself under `HKCU\...\CurrentVersion\Run`): `uninstall.bat`.
+A later rebuild leaves an existing `dist\config.json` in place. To run from source instead, without building: `run_dev.bat`. `uninstall.bat` removes the build output and the `WorldClockOverlay` value under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, which is the entry created by **Start with Windows**.
 
 ## Quick start
 
-1. Start `dist\WorldClockOverlay.exe`. On first run it shows the city that matches your system time zone, snapped to the bottom-right corner of the screen.
-2. Right-click a clock (or the tray icon) and choose **Add or remove clocks...**. Search the list of 105 cities and set each one to **Off**, **Line window** or **Separate window**.
+1. Start `dist\WorldClockOverlay.exe`. The default configuration shows Tokyo, London, and New York in the line window, snapped to the bottom-right corner until you drag it. If a configuration has no placements yet, the city that matches your system time zone is turned on instead.
+2. Right-click a clock (or the tray icon) and choose **Add or remove clocks...**. Search the list of 105 cities and set each one to **Off**, **Line window** or **Separate window**. Turning every city off is remembered; the tray icon stays so you can add clocks again.
 3. Drag the clocks where you want them. Changes are saved automatically.
+4. Optional: choose **Start with Windows** in the tray menu or a clock's right-click menu. The same command is used for the built `.exe` and for a source run.
 
 ## Controls
 
@@ -55,16 +56,17 @@ To run from source instead, without building: `run_dev.bat`. To remove the build
 | Left click and drag | move the window |
 | Mouse wheel | scale up or down |
 | Bottom-right grip | resize |
-| Right click | context menu: add or remove clocks, seconds on or off, 24h or 12h, reload config, theme, snap to bottom-right, save position, hide or close, exit |
+| Right click | context menu: add or remove clocks, seconds on or off, 24h or 12h, reload config, theme, start with Windows, snap to bottom-right, save position, hide or close, exit |
 | Tray icon click | show or hide all clocks |
-| Tray icon right click | show all, hide all, add or remove clocks, reload config, theme, exit |
+| Tray icon right click | show all, hide all, add or remove clocks, reload config, theme, start with Windows, exit |
 
 ## How it works
 
 1. **Configuration.** `config.json` lives next to the executable (or next to `app.py` when run from source). On the first start of the built executable, a default copy is written there. Edits made through the UI are written back after a short debounce.
 2. **Clocks.** Each enabled city is rendered by a card that refreshes on a timer and fits its font to the card size. Cities set to **Line window** share one horizontal strip; each **Separate window** city gets its own frameless window.
-3. **Placement.** New windows snap to the bottom-right of the current screen until you move them. Saved positions are checked against all connected screens before they are used.
-4. **Staying on top.** The windows set the always-on-top flag and raise themselves again whenever they lose activation, so clicking another window does not bury them.
+3. **Placement.** Until you drag a window, it stays snapped to the bottom-right of its screen, including after a restart. Once you drag it, the saved position is used when that position is still on a connected screen; otherwise the window returns to the bottom-right corner. Scrolling to scale resizes the window with the font.
+4. **Staying on top.** The windows set the always-on-top flag and raise themselves again whenever they lose activation, so clicking another window does not bury them. The city list and menus stay above the clocks while they are open.
+5. **One instance.** Starting the app again while it is already running shows a short notice and exits, so sign-in and a manual launch do not stack two copies on the same config file.
 
 ## Configuration
 
@@ -87,7 +89,7 @@ To add a city that is not on the list, add an entry to `cities` with a `label` a
 
 **Does it need the internet?** No. Time zone data is local.
 
-**Does it start with Windows?** Not by itself. Put a shortcut to `WorldClockOverlay.exe` in `shell:startup` if you want it to.
+**Does it start with Windows?** Only if you turn on **Start with Windows** in the tray menu or a clock's right-click menu. That stores one per-user command in `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` under the name `WorldClockOverlay`. It is not written to `config.json`. The built executable registers its own path. A source run registers `pythonw.exe` (when it sits next to `python.exe`) and `app.py`, so signing in does not open a console window. Turning the item off, or running `uninstall.bat`, deletes that value. If another command was already stored under the same name, the item is checked and its tooltip shows that command; turning it off removes it.
 
 **Is it a taskbar extension?** No. The clocks are floating windows that sit near the taskbar; they do not become part of it.
 
@@ -107,7 +109,8 @@ To add a city that is not on the list, add an entry to `cities` with a `label` a
 | `install.bat` | virtual environment, dependencies and the PyInstaller build |
 | `build.bat` | standalone build script |
 | `run_dev.bat` | run from source |
-| `uninstall.bat` | remove build output and an autostart entry |
+| `uninstall.bat` | remove build output and the autostart Run value |
+| `tests/` | unit tests and an offscreen Qt smoke test |
 | `README.pl.md` | Polish README |
 
 ## License

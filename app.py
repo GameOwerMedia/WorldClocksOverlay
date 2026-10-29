@@ -2,12 +2,15 @@ import json
 import os
 import shutil
 import sys
+import tempfile
 from collections.abc import Callable
+from contextlib import contextmanager
 from datetime import datetime
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from PySide6.QtCore import QEvent, QPoint, QRect, Qt, QTimer
 from PySide6.QtGui import QAction, QFont, QFontMetrics, QGuiApplication
+from PySide6.QtNetwork import QAbstractSocket, QLocalServer, QLocalSocket
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -40,6 +43,13 @@ PLACEMENT_OFF = "off"
 PLACEMENT_LINE = "line"
 PLACEMENT_WINDOW = "window"
 SAVE_DEBOUNCE_MS = 500
+MIN_WINDOW_SCALE = 0.6
+MAX_WINDOW_SCALE = 2.0
+AUTOSTART_RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
+AUTOSTART_RUN_VALUE = "WorldClockOverlay"
+AUTOSTART_ACTION_TEXT = "Start with Windows"
+SINGLE_INSTANCE_NAME = "WorldClockOverlay"
+_KEY_WOW64_64KEY = 0x0100
 
 
 def app_base_dir() -> str:
@@ -81,12 +91,24 @@ def _flush_save() -> None:
         return
     cfg = _save_pending_cfg
     _save_pending_cfg = None
+    path = config_path()
+    directory = os.path.dirname(os.path.abspath(path)) or "."
+    tmp_path = None
     try:
-        with open(config_path(), "w", encoding="utf-8") as file:
+        fd, tmp_path = tempfile.mkstemp(prefix=".config-", suffix=".tmp", dir=directory)
+        with os.fdopen(fd, "w", encoding="utf-8") as file:
             json.dump(cfg, file, indent=2, ensure_ascii=False)
             file.write("\n")
-    except OSError:
-        pass
+        os.chmod(tmp_path, 0o644)
+        os.replace(tmp_path, path)
+        tmp_path = None
+    except OSError as exc:
+        print(f"Failed to save {path}: {exc}", file=sys.stderr)
+        if tmp_path is not None:
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass
 
 
 def save_config(cfg: dict) -> None:
@@ -117,7 +139,7 @@ def config_opacity(cfg: dict) -> float:
 def alpha(base_alpha: int, opacity: float) -> int:
     if base_alpha <= 0:
         return 0
-    return max(1, min(255, int(round(base_alpha * opacity))))
+    return max(1, min(255, round(base_alpha * opacity)))
 
 
 def root_frame_stylesheet(theme_name: str, opacity: float) -> str:
@@ -150,12 +172,245 @@ def city_key(city: dict) -> str:
     return f"{city.get('label', '')}|{city.get('timezone', '')}"
 
 
+def format_clock_time(now: datetime, display_cfg: dict) -> str:
+    """Format a clock time with locale-independent AM/PM.
+
+    ``strftime("%p")`` follows the Windows regional format. Locales without
+    AM/PM markers, including Polish, would otherwise show a 12-hour clock
+    with a blank suffix.
+    """
+    show_seconds = bool(display_cfg.get("show_seconds", False))
+    if display_cfg.get("use_24h", True):
+        return now.strftime("%H:%M:%S" if show_seconds else "%H:%M")
+    hour = now.hour % 12 or 12
+    suffix = "AM" if now.hour < 12 else "PM"
+    if show_seconds:
+        return f"{hour}:{now.minute:02d}:{now.second:02d} {suffix}"
+    return f"{hour}:{now.minute:02d} {suffix}"
+
+
 def sample_time_text(display_cfg: dict) -> str:
     use_24h = display_cfg.get("use_24h", True)
     show_seconds = display_cfg.get("show_seconds", False)
     if use_24h:
         return "23:59:59" if show_seconds else "23:59"
     return "11:59:59 PM" if show_seconds else "11:59 PM"
+
+
+def city_matches_query(city: dict, query: str) -> bool:
+    text = query.strip().lower()
+    if not text:
+        return True
+    haystack = f"{city.get('label', '')} {city.get('timezone', '')}".lower()
+    return text in haystack
+
+
+def next_scale(current: float, delta_steps: float) -> float:
+    return round(max(MIN_WINDOW_SCALE, min(MAX_WINDOW_SCALE, float(current) + delta_steps)), 2)
+
+
+def scaled_dimension(current: int, old_scale: float, new_scale: float, minimum: int) -> int:
+    if old_scale <= 0:
+        return max(minimum, current)
+    grown = round(current * (float(new_scale) / float(old_scale)))
+    return max(minimum, grown)
+
+
+def _normalize_launch_path(path: str) -> str:
+    if os.path.isabs(path):
+        return os.path.abspath(path) if sys.platform == "win32" else path
+    if len(path) >= 3 and path[1] == ":" and path[2] in "\\/":
+        return path
+    if path.startswith("\\\\"):
+        return path
+    return os.path.abspath(path)
+
+
+def _quote_windows_arg(value: str) -> str:
+    return '"' + value.replace('"', '\\"') + '"'
+
+
+def _prefer_pythonw(executable: str) -> str:
+    executable = _normalize_launch_path(executable)
+    name = os.path.basename(executable).lower()
+    if name.startswith("python") and name.endswith(".exe") and not name.startswith("pythonw"):
+        candidate = os.path.join(os.path.dirname(executable), "pythonw.exe")
+        if os.path.isfile(candidate):
+            return candidate
+    return executable
+
+
+def autostart_launch_command(*, frozen: bool, executable: str, script_path: str) -> str:
+    """Command stored in the HKCU Run key for this process.
+
+    The built executable is registered by its own path. A source run prefers
+    ``pythonw.exe`` next to the interpreter so Windows does not open a console.
+    ``uninstall.bat`` deletes the same Run value regardless of which command
+    was stored.
+    """
+    if frozen:
+        return _quote_windows_arg(_normalize_launch_path(executable))
+    interpreter = _prefer_pythonw(executable)
+    script = _normalize_launch_path(script_path)
+    return f"{_quote_windows_arg(interpreter)} {_quote_windows_arg(script)}"
+
+
+def current_autostart_command() -> str:
+    return autostart_launch_command(
+        frozen=bool(getattr(sys, "frozen", False)),
+        executable=sys.executable,
+        script_path=os.path.abspath(__file__),
+    )
+
+
+class MemoryAutostartStore:
+    def __init__(self, value: str | None = None):
+        self.value = value
+
+    def read(self) -> str | None:
+        return self.value
+
+    def write(self, command: str) -> None:
+        self.value = command
+
+    def delete(self) -> None:
+        self.value = None
+
+
+class UnsupportedAutostartStore:
+    def read(self) -> str | None:
+        return None
+
+    def write(self, command: str) -> None:
+        raise OSError("Start with Windows is only available on Windows.")
+
+    def delete(self) -> None:
+        raise OSError("Start with Windows is only available on Windows.")
+
+
+class WinregAutostartStore:
+    """HKCU Run value named WorldClockOverlay, in the 64-bit registry view.
+
+    A 32-bit Python would otherwise be redirected to Wow6432Node, which
+    Windows does not read at sign-in. ``uninstall.bat`` deletes this value
+    with ``reg delete``.
+    """
+
+    def _access(self, write: bool):
+        import winreg
+
+        base = winreg.KEY_SET_VALUE if write else winreg.KEY_READ
+        wow64 = getattr(winreg, "KEY_WOW64_64KEY", _KEY_WOW64_64KEY)
+        return base | wow64
+
+    def read(self) -> str | None:
+        import winreg
+
+        try:
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, AUTOSTART_RUN_KEY, 0, self._access(False)) as key:
+                value, _regtype = winreg.QueryValueEx(key, AUTOSTART_RUN_VALUE)
+        except FileNotFoundError:
+            return None
+        except OSError:
+            return None
+        text = str(value).strip() if value is not None else ""
+        return text or None
+
+    def write(self, command: str) -> None:
+        import winreg
+
+        with winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, AUTOSTART_RUN_KEY, 0, self._access(True)) as key:
+            winreg.SetValueEx(key, AUTOSTART_RUN_VALUE, 0, winreg.REG_SZ, command)
+
+    def delete(self) -> None:
+        import winreg
+
+        try:
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, AUTOSTART_RUN_KEY, 0, self._access(True)) as key:
+                winreg.DeleteValue(key, AUTOSTART_RUN_VALUE)
+        except FileNotFoundError:
+            return
+
+
+class AutostartController:
+    def __init__(self, store, command: str, supported: bool = True):
+        self.store = store
+        self.command = command
+        self.supported = supported
+
+    def is_enabled(self) -> bool:
+        if not self.supported:
+            return False
+        return bool(self.store.read())
+
+    def set_enabled(self, enabled: bool) -> None:
+        if enabled:
+            self.store.write(self.command)
+        else:
+            self.store.delete()
+
+    def tooltip(self) -> str:
+        if not self.supported:
+            return "Start with Windows is only available on Windows."
+        current = self.store.read()
+        if current and current != self.command:
+            return f"Currently registered as: {current}"
+        return "Launch this program when you sign in to Windows."
+
+
+def default_autostart_controller() -> AutostartController:
+    command = current_autostart_command()
+    if sys.platform == "win32":
+        return AutostartController(WinregAutostartStore(), command, supported=True)
+    return AutostartController(UnsupportedAutostartStore(), command, supported=False)
+
+
+def claim_single_instance(name: str = SINGLE_INSTANCE_NAME) -> QLocalServer | None:
+    """Return a listening server, or None when another instance is running.
+
+    The caller must keep the returned server alive. A crashed process releases
+    the name; ``removeServer`` clears a stale socket before listening.
+    """
+    probe = QLocalSocket()
+    probe.connectToServer(name)
+    if probe.waitForConnected(200):
+        probe.disconnectFromServer()
+        return None
+    QLocalServer.removeServer(name)
+    server = QLocalServer()
+    if server.listen(name):
+        return server
+    if server.serverError() == QAbstractSocket.SocketError.AddressInUseError:
+        return None
+    return server
+
+
+def show_message(icon: QMessageBox.Icon, title: str, text: str) -> None:
+    box = QMessageBox()
+    box.setIcon(icon)
+    box.setWindowTitle(title)
+    box.setText(text)
+    box.setWindowFlag(Qt.WindowStaysOnTopHint, True)
+    box.exec()
+
+
+def place_window_initially(window: QWidget, width: int, height: int, saved_x, saved_y, snap: bool, snap_to_corner: Callable[[], None]) -> None:
+    window._applying_geometry = True
+    try:
+        window.resize(width, height)
+        visible = (
+            saved_x is not None
+            and saved_y is not None
+            and rect_is_visible_on_any_screen(int(saved_x), int(saved_y), width, height)
+        )
+        if visible:
+            window.move(int(saved_x), int(saved_y))
+        if snap or not visible:
+            snap_to_corner()
+        window.show()
+    finally:
+        window._applying_geometry = False
+        window._geometry_ready = True
 
 
 def local_timezone_key() -> str | None:
@@ -212,17 +467,22 @@ def normalize_config(cfg: dict) -> dict:
     display_cfg.setdefault("font_size_time", 20)
     display_cfg.setdefault("theme", "black")
 
+    valid_placements = {PLACEMENT_OFF, PLACEMENT_LINE, PLACEMENT_WINDOW}
+    configured = any(city.get("placement") in valid_placements for city in cities)
+
     for index, city in enumerate(cities):
         city.setdefault("label", "Clock")
         city.setdefault("timezone", "UTC")
         placement = city.get("placement")
-        if placement not in {PLACEMENT_OFF, PLACEMENT_LINE, PLACEMENT_WINDOW}:
+        if placement not in valid_placements:
             placement = PLACEMENT_LINE if city.get("enabled", False) else PLACEMENT_OFF
         city["placement"] = placement
         city["enabled"] = placement != PLACEMENT_OFF
         ensure_city_window(city, index)
 
-    if not any(city.get("enabled", False) for city in cities):
+    # A config that already names placements, including all Off, is left alone.
+    # Only a list with no placements yet gets the system time zone on the line.
+    if not configured and not any(city.get("enabled", False) for city in cities):
         default_city = choose_default_city(cities)
         if default_city is not None:
             default_city["placement"] = PLACEMENT_LINE
@@ -241,7 +501,12 @@ def measure_card_size(label: str, display_cfg: dict, scale: float) -> tuple[int,
     time_metrics = QFontMetrics(time_font)
     city_width = city_metrics.horizontalAdvance(label.upper())
     time_width = time_metrics.horizontalAdvance(sample_time_text(display_cfg))
-    return max(city_width, time_width) + 16, city_metrics.height() + time_metrics.height() + 10
+    width = max(city_width, time_width) + 16
+    height = city_metrics.height() + time_metrics.height() + 10
+    # Scale 1 keeps the compact default. Larger scales raise the floor so the
+    # scrolled-up font is not immediately clipped by the old minimum.
+    factor = max(1.0, float(scale))
+    return round(width * factor), round(height * factor)
 
 
 class CitySelectionDialog(QDialog):
@@ -255,6 +520,7 @@ class CitySelectionDialog(QDialog):
         self.on_apply = on_apply
         self.rows: list[tuple[QWidget, QComboBox, dict]] = []
         self.setWindowTitle("Manage clocks")
+        self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         self.resize(520, 620)
         self.setModal(True)
 
@@ -313,10 +579,8 @@ class CitySelectionDialog(QDialog):
         self.update_summary()
 
     def filter_items(self, text: str) -> None:
-        query = text.strip().lower()
         for row_widget, _combo, city in self.rows:
-            haystack = f"{city['label']} {city['timezone']}".lower()
-            row_widget.setVisible(query in haystack if query else True)
+            row_widget.setVisible(city_matches_query(city, text))
 
     def selected_mapping(self) -> dict[str, str]:
         return {city_key(city): combo.currentData() for _row, combo, city in self.rows}
@@ -438,18 +702,12 @@ class TimeCard(QFrame):
         try:
             tz = ZoneInfo(self.timezone_name)
             now = datetime.now(tz)
-            use_24h = self.display_cfg.get("use_24h", True)
-            show_seconds = self.display_cfg.get("show_seconds", False)
-            if use_24h:
-                fmt = "%H:%M:%S" if show_seconds else "%H:%M"
-            else:
-                fmt = "%I:%M:%S %p" if show_seconds else "%I:%M %p"
-            self.current_time_text = now.strftime(fmt)
+            self.current_time_text = format_clock_time(now, self.display_cfg)
             self.time_label_widget.setText(self.current_time_text)
         except ZoneInfoNotFoundError:
             self.current_time_text = "TZ ERR"
             self.time_label_widget.setText(self.current_time_text)
-        except Exception:
+        except (TypeError, ValueError, OSError, OverflowError):
             self.current_time_text = "ERR"
             self.time_label_widget.setText(self.current_time_text)
 
@@ -466,6 +724,8 @@ class SingleClockWindow(QWidget):
         self.window_cfg = ensure_city_window(city, 0)
         self.drag_active = False
         self.drag_offset = QPoint()
+        self._applying_geometry = False
+        self._geometry_ready = False
 
         self.apply_window_flags()
         self.setAttribute(Qt.WA_TranslucentBackground)
@@ -509,6 +769,8 @@ class SingleClockWindow(QWidget):
         self.setWindowFlags(flags)
 
     def _restore_overlay_visibility(self) -> None:
+        if self.manager.restore_suspended:
+            return
         if self.isVisible():
             self.show()
             self.raise_()
@@ -537,15 +799,15 @@ class SingleClockWindow(QWidget):
         width = max(min_width, int(self.window_cfg.get("width", DEFAULT_CITY_WIDTH)))
         height = max(min_height, int(self.window_cfg.get("height", DEFAULT_CITY_HEIGHT)))
         self.setMinimumSize(min_width, min_height)
-        self.resize(width, height)
-
-        x = self.window_cfg.get("x")
-        y = self.window_cfg.get("y")
-        if x is not None and y is not None and rect_is_visible_on_any_screen(int(x), int(y), width, height):
-            self.move(x, y)
-        else:
-            self.snap_bottom_right(save_state=False)
-        self.show()
+        place_window_initially(
+            self,
+            width,
+            height,
+            self.window_cfg.get("x"),
+            self.window_cfg.get("y"),
+            bool(self.window_cfg.get("snap_bottom_right", True)),
+            lambda: self.snap_bottom_right(save_state=False),
+        )
 
     def current_screen_geometry(self) -> QRect:
         screen = QGuiApplication.screenAt(self.frameGeometry().center())
@@ -571,12 +833,20 @@ class SingleClockWindow(QWidget):
 
     def scale_by(self, delta_steps: float) -> None:
         current = float(self.window_cfg.get("scale", 1.0))
-        self.window_cfg["scale"] = round(max(0.6, min(2.0, current + delta_steps)), 2)
-        self.card.scale = self.window_cfg["scale"]
-        self.card.update_fonts()
+        updated = next_scale(current, delta_steps)
+        if updated == current:
+            return
+        old_width = self.width()
+        old_height = self.height()
+        self.window_cfg["scale"] = updated
+        self.card.scale = updated
         min_width, min_height = self.minimum_clock_size()
         self.setMinimumSize(min_width, min_height)
-        self.resize(max(self.width(), min_width), max(self.height(), min_height))
+        self.resize(
+            scaled_dimension(old_width, current, updated, min_width),
+            scaled_dimension(old_height, current, updated, min_height),
+        )
+        self.card.update_fonts()
         self.save_window_state()
 
     def close_clock(self) -> None:
@@ -613,7 +883,8 @@ class SingleClockWindow(QWidget):
         self.setMinimumSize(min_width, min_height)
         self.size_grip.move(max(0, self.root.width() - self.size_grip.width() - 5), max(0, self.root.height() - self.size_grip.height() - 5))
         self.card.update_fonts()
-        self.window_cfg["snap_bottom_right"] = False
+        if self._applying_geometry or not self._geometry_ready:
+            return
         self.save_window_state()
 
     def contextMenuEvent(self, event) -> None:
@@ -633,7 +904,8 @@ class SingleClockWindow(QWidget):
         menu.addSeparator()
         menu.addAction(act_close)
         menu.addAction(self.manager.exit_action(self))
-        menu.exec(event.globalPos())
+        with self.manager.suspend_overlay_restore():
+            menu.exec(event.globalPos())
 
 
 class LineClockWindow(QWidget):
@@ -643,6 +915,8 @@ class LineClockWindow(QWidget):
         self.drag_active = False
         self.drag_offset = QPoint()
         self.cards: list[TimeCard] = []
+        self._applying_geometry = False
+        self._geometry_ready = False
 
         self.apply_window_flags()
         self.setAttribute(Qt.WA_TranslucentBackground)
@@ -687,6 +961,8 @@ class LineClockWindow(QWidget):
         self.setWindowFlags(flags)
 
     def _restore_overlay_visibility(self) -> None:
+        if self.manager.restore_suspended:
+            return
         if self.isVisible():
             self.show()
             self.raise_()
@@ -741,15 +1017,15 @@ class LineClockWindow(QWidget):
         saved_height = int(self.manager.cfg["window"].get("height", min_height))
         width = max(min_width, saved_width)
         height = max(min_height, saved_height)
-        self.resize(width, height)
-
-        x = self.manager.cfg["window"].get("x")
-        y = self.manager.cfg["window"].get("y")
-        if x is not None and y is not None and rect_is_visible_on_any_screen(int(x), int(y), width, height):
-            self.move(x, y)
-        else:
-            self.snap_bottom_right(save_state=False)
-        self.show()
+        place_window_initially(
+            self,
+            width,
+            height,
+            self.manager.cfg["window"].get("x"),
+            self.manager.cfg["window"].get("y"),
+            bool(self.manager.cfg["window"].get("snap_bottom_right", True)),
+            lambda: self.snap_bottom_right(save_state=False),
+        )
 
     def current_screen_geometry(self) -> QRect:
         screen = QGuiApplication.screenAt(self.frameGeometry().center())
@@ -778,8 +1054,22 @@ class LineClockWindow(QWidget):
 
     def scale_by(self, delta_steps: float) -> None:
         current = float(self.manager.cfg["window"].get("scale", 1.0))
-        self.manager.cfg["window"]["scale"] = round(max(0.6, min(2.0, current + delta_steps)), 2)
-        self.manager.refresh_all_windows()
+        updated = next_scale(current, delta_steps)
+        if updated == current:
+            return
+        old_width = self.width()
+        old_height = self.height()
+        self.manager.cfg["window"]["scale"] = updated
+        for card in self.cards:
+            card.scale = updated
+        min_width, min_height = self.minimum_line_size()
+        self.setMinimumSize(min_width, min_height)
+        self.resize(
+            scaled_dimension(old_width, current, updated, min_width),
+            scaled_dimension(old_height, current, updated, min_height),
+        )
+        for card in self.cards:
+            card.update_fonts()
         self.save_window_state()
 
     def closeEvent(self, event) -> None:
@@ -814,7 +1104,8 @@ class LineClockWindow(QWidget):
         self.size_grip.move(max(0, self.root.width() - self.size_grip.width() - 5), max(0, self.root.height() - self.size_grip.height() - 5))
         for card in self.cards:
             card.update_fonts()
-        self.manager.cfg["window"]["snap_bottom_right"] = False
+        if self._applying_geometry or not self._geometry_ready:
+            return
         self.save_window_state()
 
     def contextMenuEvent(self, event) -> None:
@@ -834,15 +1125,19 @@ class LineClockWindow(QWidget):
         menu.addSeparator()
         menu.addAction(act_hide)
         menu.addAction(self.manager.exit_action(self))
-        menu.exec(event.globalPos())
+        with self.manager.suspend_overlay_restore():
+            menu.exec(event.globalPos())
 
 
 class ClockManager:
-    def __init__(self, app: QApplication, cfg: dict):
+    def __init__(self, app: QApplication, cfg: dict, autostart: AutostartController | None = None):
         self.app = app
         self.cfg = cfg
+        self.autostart = autostart or default_autostart_controller()
+        self.restore_suspended = 0
         self.line_window: LineClockWindow | None = None
         self.detached_windows: dict[str, SingleClockWindow] = {}
+        self.tray_autostart_action: QAction | None = None
 
         self.tray = QSystemTrayIcon()
         self.tray.setIcon(self.app.style().standardIcon(QStyle.SP_ComputerIcon))
@@ -851,6 +1146,14 @@ class ClockManager:
         self.tray.activated.connect(self.on_tray_activated)
         self.tray.show()
         self.sync_windows()
+
+    @contextmanager
+    def suspend_overlay_restore(self):
+        self.restore_suspended += 1
+        try:
+            yield
+        finally:
+            self.restore_suspended = max(0, self.restore_suspended - 1)
 
     def enabled_cities(self) -> list[dict]:
         return [city for city in self.cfg.get("cities", []) if city.get("enabled", False)]
@@ -878,6 +1181,7 @@ class ClockManager:
         act_white.triggered.connect(lambda: self.set_theme("white"))
         act_exit = QAction("Exit", self.app)
         act_exit.triggered.connect(self.exit_requested)
+        self.tray_autostart_action = self._make_autostart_action(menu)
 
         menu.addAction(act_show)
         menu.addAction(act_hide)
@@ -885,9 +1189,39 @@ class ClockManager:
         menu.addAction(act_reload)
         menu.addAction(act_black)
         menu.addAction(act_white)
+        menu.addAction(self.tray_autostart_action)
         menu.addSeparator()
         menu.addAction(act_exit)
+        menu.aboutToShow.connect(lambda: self._sync_autostart_action(self.tray_autostart_action))
         self.tray.setContextMenu(menu)
+
+    def _make_autostart_action(self, parent) -> QAction:
+        action = QAction(AUTOSTART_ACTION_TEXT, parent)
+        action.setCheckable(True)
+        action.triggered.connect(self._on_autostart_triggered)
+        self._sync_autostart_action(action)
+        return action
+
+    def _sync_autostart_action(self, action: QAction | None) -> None:
+        if action is None:
+            return
+        action.setEnabled(self.autostart.supported)
+        action.blockSignals(True)
+        action.setChecked(self.autostart.is_enabled())
+        action.blockSignals(False)
+        action.setToolTip(self.autostart.tooltip())
+
+    def _on_autostart_triggered(self, checked: bool = False) -> None:
+        try:
+            self.autostart.set_enabled(bool(checked))
+        except OSError as exc:
+            with self.suspend_overlay_restore():
+                show_message(QMessageBox.Warning, APP_NAME, f"Could not update Start with Windows.\n{exc}")
+        sender = self.sender()
+        if isinstance(sender, QAction):
+            self._sync_autostart_action(sender)
+        if self.tray_autostart_action is not None and sender is not self.tray_autostart_action:
+            self._sync_autostart_action(self.tray_autostart_action)
 
     def populate_common_menu(self, menu: QMenu) -> None:
         act_manage = QAction("Add or remove clocks...", menu)
@@ -910,6 +1244,7 @@ class ClockManager:
         menu.addAction(act_reload)
         menu.addAction(act_black)
         menu.addAction(act_white)
+        menu.addAction(self._make_autostart_action(menu))
 
     def exit_action(self, parent: QWidget) -> QAction:
         action = QAction("Exit", parent)
@@ -997,11 +1332,14 @@ class ClockManager:
         self.refresh_all_windows()
 
     def reload_config(self) -> None:
-        try:
-            self.cfg = normalize_config(load_config())
-            self.refresh_all_windows()
-        except Exception as exc:
-            QMessageBox.critical(None, "Configuration error", str(exc))
+        with self.suspend_overlay_restore():
+            try:
+                loaded = normalize_config(load_config())
+            except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
+                show_message(QMessageBox.Critical, "Configuration error", str(exc))
+                return
+        self.cfg = loaded
+        self.refresh_all_windows()
 
     def apply_selected_cities(self, mapping: dict[str, str]) -> None:
         for city in self.cfg.get("cities", []):
@@ -1009,19 +1347,14 @@ class ClockManager:
             city["placement"] = placement
             city["enabled"] = placement != PLACEMENT_OFF
 
-        if not any(city.get("enabled", False) for city in self.cfg.get("cities", [])):
-            default_city = choose_default_city(self.cfg.get("cities", []))
-            if default_city is not None:
-                default_city["placement"] = PLACEMENT_LINE
-                default_city["enabled"] = True
-
         save_config(self.cfg)
         self.refresh_all_windows()
         self.show_all()
 
     def select_cities(self) -> None:
         dialog = CitySelectionDialog(self.cfg.get("cities", []), on_apply=self.apply_selected_cities)
-        dialog.exec()
+        with self.suspend_overlay_restore():
+            dialog.exec()
 
     def remove_clock(self, key: str) -> None:
         for city in self.cfg.get("cities", []):
@@ -1067,12 +1400,18 @@ class ClockManager:
 def main() -> int:
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
+    instance = claim_single_instance()
+    if instance is None:
+        show_message(QMessageBox.Information, APP_NAME, f"{APP_NAME} is already running.")
+        return 0
+    # Keep the server referenced for the life of the process.
+    app._single_instance_server = instance
 
     try:
         ensure_config_next_to_exe()
         cfg = normalize_config(load_config())
-    except Exception as exc:
-        QMessageBox.critical(None, "Configuration error", str(exc))
+    except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
+        show_message(QMessageBox.Critical, "Configuration error", str(exc))
         return 1
 
     _manager = ClockManager(app, cfg)

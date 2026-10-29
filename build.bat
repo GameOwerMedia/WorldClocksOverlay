@@ -1,5 +1,6 @@
 @echo off
 setlocal
+cd /d "%~dp0"
 
 set "EXE_PATH=dist\WorldClockOverlay.exe"
 
@@ -17,7 +18,7 @@ if errorlevel 1 goto :fail
 pip install -r requirements.txt
 if errorlevel 1 goto :fail
 
-pip install pyinstaller
+pip install "pyinstaller>=6.3"
 if errorlevel 1 goto :fail
 
 if exist "%EXE_PATH%" (
@@ -30,12 +31,14 @@ if exist "%EXE_PATH%" (
     )
 )
 
-python -m PyInstaller --noconfirm --onefile --windowed --name WorldClockOverlay --add-data "config.json;." app.py
+python -m PyInstaller --noconfirm --onefile --windowed --name WorldClockOverlay --add-data "config.json;." --collect-all tzdata app.py
 if errorlevel 1 goto :fail
 
 if not exist dist mkdir dist
-copy /Y config.json dist\config.json >nul
-if errorlevel 1 goto :fail
+if not exist "dist\config.json" (
+    copy /Y "config.json" "dist\config.json" >nul
+    if errorlevel 1 goto :fail
+)
 
 if not exist "%EXE_PATH%" (
     echo.
